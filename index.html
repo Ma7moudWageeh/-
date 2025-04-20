@@ -7,6 +7,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700&display=swap');
 
+    /* أنماط عامة */
     body {
       margin: 0;
       height: 100vh;
@@ -28,6 +29,7 @@
       max-width: 400px;
       width: 90%;
       box-sizing: border-box;
+      z-index: 1;
     }
 
     h1 {
@@ -38,6 +40,7 @@
       line-height: 1.4;
     }
 
+    /* أنماط الأزرار */
     .btn-group {
       display: flex;
       justify-content: center;
@@ -70,12 +73,45 @@
       transform: scale(1.05);
     }
 
-    /* نمط الأزرار عندما تتحرك */
     .btn.moving {
       position: fixed;
       margin: 0;
     }
 
+    /* أنماط الرسالة المتحركة المعدلة */
+    .floating-message {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      color: white;
+      padding: 10px 20px; /* حجم أصغر */
+      border-radius: 20px;
+      font-family: 'Tajawal', sans-serif;
+      font-weight: bold;
+      z-index: 1000;
+      white-space: nowrap;
+      background: rgba(255, 64, 129, 0.25); /* شفافية أعلى */
+      backdrop-filter: blur(25px); /* ضبابية أقوى */
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.15); /* حدود أخف */
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* ظل أخف */
+      font-size: 0.95rem; /* حجم خط أصغر */
+      animation: float-in 0.3s ease-out; /* إضافة حركة دخول */
+    }
+
+    @keyframes float-in {
+      from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+      }
+    }
+
+    /* أنماط للجوال */
     @media (max-width: 480px) {
       .container {
         padding: 1.5rem;
@@ -88,13 +124,20 @@
       .btn {
         padding: 10px 20px;
         min-width: 100px;
+        font-size: 0.9rem;
+      }
+      
+      .floating-message {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        border-radius: 18px;
       }
     }
   </style>
 </head>
 <body>
- <div class="container">
-    <h1>متأكد عاوز الهدية ؟ 🫣</h1>
+  <div class="container">
+    <h1>متأكد عاوز الهدية؟ 🫣</h1>
     <div class="btn-group">
       <button class="btn yes-btn" id="yesBtn">يب 🥰</button>
       <button class="btn no-btn" id="noBtn">لا يعم مش عاوز منك حاجه🙏</button>
@@ -102,25 +145,18 @@
   </div>
 
   <script>
+    // العناصر الرئيسية
     const yesBtn = document.getElementById("yesBtn");
     const noBtn = document.getElementById("noBtn");
     let yesBtnMoved = false;
     let noBtnMoved = false;
+    let yesClickCount = 0;
 
-    // جعل الأزرار تتحرك عند النقر عليها
-    yesBtn.addEventListener('click', function() {
-      if (!yesBtnMoved) {
-        yesBtn.classList.add('moving');
-        yesBtnMoved = true;
-      }
-      moveButtonRandomly(yesBtn);;
-    });
+    // أحداث النقر على الأزرار
+    yesBtn.addEventListener('click', handleYesClick);
+    noBtn.addEventListener('click', handleNoClick);
 
-    noBtn.addEventListener('click', function() {
-      moveButtonRandomly(noBtn);
-      alert("يعم حبيبي اللي تشوفه 😊");
-    });
-
+    // وظائف الحركة
     function moveButtonRandomly(btn) {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
@@ -134,6 +170,85 @@
       
       btn.style.left = `${newX}px`;
       btn.style.top = `${newY}px`;
+    }
+
+    // معالجة النقر على زر نعم
+    function handleYesClick() {
+      if (!yesBtnMoved) {
+        yesBtn.classList.add('moving');
+        yesBtnMoved = true;
+      }
+      moveButtonRandomly(yesBtn);
+      yesClickCount++;
+      showMessageBasedOnClicks();
+    }
+
+    // معالجة النقر على زر لا
+    function handleNoClick() {
+      moveButtonRandomly(noBtn);
+      alert("يعم حبيبي اللي تشوفه 😊");
+    }
+
+    // عرض الرسائل حسب عدد النقرات
+    function showMessageBasedOnClicks() {
+      let message = "";
+      
+      if(yesClickCount === 3) {
+        message = "اضغط كمان 5 مرات وحلال عليك";
+      } else if(yesClickCount === 8) {
+        message = "معلش بقا استحملني كمان مرتين";
+      } else if(yesClickCount === 10) {
+        message = "شكلك يا عبضو بتشوف كويس";
+      } else if(yesClickCount === 11) {
+        message = "اعقل يسطا";
+      } else if(yesClickCount === 13){
+        message = "يابو اييد كبييره";
+      }
+      
+      if(message) {
+        showFloatingMessage(message);
+      }
+    }
+
+    // عرض الرسالة العائمة مع حركة دخول تدريجية
+    function showFloatingMessage(text) {
+      const message = document.createElement('div');
+      message.className = 'floating-message';
+      message.textContent = text;
+      document.body.appendChild(message);
+      
+      // بداية الرسالة خارج الشاشة
+      message.style.right = '-300px';
+      message.style.opacity = '0';
+      
+      // حركة الدخول
+      let enterPos = -300;
+      const enterInterval = setInterval(() => {
+        enterPos += 3;
+        message.style.right = `${enterPos}px`;
+        message.style.opacity = (enterPos / 100 + 3).toString();
+        
+        if (enterPos >= 0) {
+          clearInterval(enterInterval);
+          message.style.right = '0';
+          message.style.opacity = '1';
+          startExitAnimation(message);
+        }
+      }, 20);
+    }
+
+    // حركة الخروج للرسالة
+    function startExitAnimation(message) {
+      let exitPos = 0;
+      const exitInterval = setInterval(() => {
+        exitPos += 4;
+        message.style.right = `${exitPos}px`;
+        
+        if (exitPos > window.innerWidth) {
+          clearInterval(exitInterval);
+          message.remove();
+        }
+      }, 20);
     }
   </script>
 </body>
